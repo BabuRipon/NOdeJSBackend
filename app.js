@@ -4,6 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var morgan = require('morgan');
 var mongoose=require('mongoose');
+var key=require('./setup/setUrl').secret;
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -13,6 +14,12 @@ var leaderRouter=require('./routes/leaderRouter');
 
 var app = express();
 
+//mongodb confiiguration
+const db=require('./setup/setUrl').url;
+mongoose.connect(db)
+.then(()=>{console.log('mongodb connected succesfully.....')})
+.catch(err=>console.log(err));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -20,43 +27,55 @@ app.set('view engine', 'jade');
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser(key));
 
 function auth(req,res,next){
-    console.log(req.headers);
-    var authHeader=req.headers.authorization;
-    console.log(authHeader);
-    if(!authHeader){
-      var err=new Error('you are not authenticated');
-      res.setHeader('WWW-Authenticate','Basic')
-      err.status=401;
-      next(err);
-      return;
-    }
 
-    var auth=new Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':');
-    console.log(auth);
-    var user=auth[0];
-    var pass=auth[1];
-    if(user==='ripon'&&pass==='ripon123'){
-      next();//authorized
+  // console.log(req.signedCookies);
+  // console.log(req.signedCookies.user);
+  if(!req.signedCookies.user){
+        var authHeader=req.headers.authorization;
+        //  console.log(authHeader);
+        if(!authHeader){
+          var err=new Error('you should be authenticate by through username and password...');
+          res.setHeader('WWW-Authenticate','Basic')
+          err.status=401;
+          next(err);
+          return;
+        }
+
+        var auth=new Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':');
+        // console.log(auth);
+        var user=auth[0];
+        var pass=auth[1];
+        if(user==='ripon'&&pass==='ripon123'){
+          res.cookie('user','ripon',{signed:true});
+          next();//authorized
+        }
+        else{
+          var err=new Error('you are not authenticated');
+          res.setHeader('WWW-Authenticate','Basic')
+          err.status=401;
+          next(err);
+        }
     }
     else{
-      var err=new Error('you are not authenticated');
-      res.setHeader('WWW-Authenticate','Basic')
-      err.status=401;
-      next(err);
+       
+       if(req.signedCookies.user==='ripon'){
+         next();
+       }
+       else{
+          var err=new Error('you are not authenticated');
+          err.status=401;
+          next(err);
+       }
     }
+    
 }
 
 app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-const db=require('./setup/setUrl').url;
-mongoose.connect(db)
-.then(()=>{console.log('mongodb connected succesfully.....')})
-.catch(err=>console.log(err));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
