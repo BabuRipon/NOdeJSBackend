@@ -1,7 +1,8 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
+// var cookieParser = require('cookie-parser');
+var session=require('express-session');
 var morgan = require('morgan');
 var mongoose=require('mongoose');
 var key=require('./setup/setUrl').secret;
@@ -27,13 +28,24 @@ app.set('view engine', 'jade');
 app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser(key));
+// app.use(cookieParser(key));
+app.use(session({
+  name:'session-id',
+  secret:key,
+  saveUninitialized:false,
+  resave:false
+}))
 
 function auth(req,res,next){
 
   // console.log(req.signedCookies);
   // console.log(req.signedCookies.user);
-  if(!req.signedCookies.user){
+  // console.log(req.session.cookie);
+  // console.log(".................");
+  // console.log(req.session);
+  // console.log(".................");
+  console.log(req.session);
+  if(!req.session.user){
         var authHeader=req.headers.authorization;
         //  console.log(authHeader);
         if(!authHeader){
@@ -49,7 +61,8 @@ function auth(req,res,next){
         var user=auth[0];
         var pass=auth[1];
         if(user==='ripon'&&pass==='ripon123'){
-          res.cookie('user','ripon',{signed:true});
+          // res.cookie('user','ripon',{signed:true});
+          req.session.user='ripon';
           next();//authorized
         }
         else{
@@ -61,7 +74,8 @@ function auth(req,res,next){
     }
     else{
        
-       if(req.signedCookies.user==='ripon'){
+       if(req.session.user==='ripon'){
+      
          next();
        }
        else{
