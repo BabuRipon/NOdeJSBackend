@@ -36,53 +36,27 @@ app.use(session({
   resave:false
 }))
 
+app.use('/', indexRouter);
+app.use('/users', usersRouter);
+
 function auth(req,res,next){
 
-  // console.log(req.signedCookies);
-  // console.log(req.signedCookies.user);
-  // console.log(req.session.cookie);
-  // console.log(".................");
-  // console.log(req.session);
-  // console.log(".................");
   console.log(req.session);
-  if(!req.session.user){
-        var authHeader=req.headers.authorization;
-        //  console.log(authHeader);
-        if(!authHeader){
-          var err=new Error('you should be authenticate by through username and password...');
-          res.setHeader('WWW-Authenticate','Basic')
+      if(!req.session.user){
+          var err=new Error('you should login with your account');
           err.status=401;
           next(err);
-          return;
-        }
-
-        var auth=new Buffer.from(authHeader.split(' ')[1],'base64').toString().split(':');
-        // console.log(auth);
-        var user=auth[0];
-        var pass=auth[1];
-        if(user==='ripon'&&pass==='ripon123'){
-          // res.cookie('user','ripon',{signed:true});
-          req.session.user='ripon';
-          next();//authorized
+       }
+      else{
+       
+        if(req.session.user==='authenticated'){
+          next();
         }
         else{
-          var err=new Error('you are not authenticated');
-          res.setHeader('WWW-Authenticate','Basic')
-          err.status=401;
-          next(err);
+            var err=new Error('you are not authenticated');
+            err.status=403;
+            next(err);
         }
-    }
-    else{
-       
-       if(req.session.user==='ripon'){
-      
-         next();
-       }
-       else{
-          var err=new Error('you are not authenticated');
-          err.status=401;
-          next(err);
-       }
     }
     
 }
@@ -91,8 +65,6 @@ app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
 app.use('/dishes',dishRouter);
 app.use('/leaders',leaderRouter);
 app.use('/promotions',promoRouter);
