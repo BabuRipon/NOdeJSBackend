@@ -5,6 +5,8 @@ var path = require('path');
 var session=require('express-session');
 var morgan = require('morgan');
 var mongoose=require('mongoose');
+var passport=require('passport');
+var authenticate=require('./authenticate');
 var key=require('./setup/setUrl').secret;
 
 var indexRouter = require('./routes/index');
@@ -36,29 +38,26 @@ app.use(session({
   resave:false
 }))
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
 function auth(req,res,next){
-
+  
+  // console.log(req.user);
   console.log(req.session);
-      if(!req.session.user){
+
+      if(!req.user){
           var err=new Error('you should login with your account');
           err.status=401;
           next(err);
        }
       else{
-       
-        if(req.session.user==='authenticated'){
           next();
         }
-        else{
-            var err=new Error('you are not authenticated');
-            err.status=403;
-            next(err);
-        }
-    }
-    
+
 }
 
 app.use(auth);
