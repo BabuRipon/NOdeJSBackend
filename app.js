@@ -2,12 +2,12 @@ var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
 // var cookieParser = require('cookie-parser');
-var session=require('express-session');
+// var session=require('express-session');
 var morgan = require('morgan');
 var mongoose=require('mongoose');
 var passport=require('passport');
 var authenticate=require('./authenticate');
-var key=require('./setup/setUrl').secret;
+// var key=require('./setup/setUrl').secret;
 // var auth=require('./setup/authmod');
 
 var indexRouter = require('./routes/index');
@@ -32,15 +32,15 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 // app.use(cookieParser(key));
-app.use(session({
-  name:'session-id',
-  secret:key,
-  saveUninitialized:false,
-  resave:false
-}))
+// app.use(session({
+//   name:'session-id',
+//   secret:key,
+//   saveUninitialized:false,
+//   resave:false
+// }))
 
 app.use(passport.initialize());
-app.use(passport.session());
+// app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
