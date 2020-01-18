@@ -8,6 +8,7 @@ var mongoose=require('mongoose');
 var passport=require('passport');
 var authenticate=require('./authenticate');
 var key=require('./setup/setUrl').secret;
+// var auth=require('./setup/authmod');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -44,23 +45,7 @@ app.use(passport.session());
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 
-function auth(req,res,next){
-  
-  // console.log(req.user);
-  console.log(req.session);
-
-      if(!req.user){
-          var err=new Error('you should login with your account');
-          err.status=401;
-          next(err);
-       }
-      else{
-          next();
-        }
-
-}
-
-app.use(auth);
+// app.use(auth);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
