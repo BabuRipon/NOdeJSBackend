@@ -1,5 +1,6 @@
 const express=require('express');
 const leaderRouter=express.Router();
+var auth=require('../setup/authmod');
 
 const Leaders=require('../model/leaders');
 
@@ -13,7 +14,7 @@ leaderRouter.route('/')
      })
      .catch(err=>next(err));
 })
-.post((req,res,next)=>{
+.post(auth,(req,res,next)=>{
      Leaders.create(req.body)
      .then(leader=>{
          res.statusCode=200;
@@ -22,11 +23,11 @@ leaderRouter.route('/')
      })
      .catch(err=>next(err))
 })
-.put((req,res,next)=>{
+.put(auth,(req,res,next)=>{
     res.statusCode=403;
     res.end('PUT operation not supported on /leaders');
 })
-.delete((req,res,next)=>{
+.delete(auth,(req,res,next)=>{
     Leaders.remove({})
     .then(leader=>{
         res.statusCode=200;
@@ -37,7 +38,7 @@ leaderRouter.route('/')
 })
 
 leaderRouter.route('/:leaderId')
-.get((req,res,next)=>{
+.get(auth,(req,res,next)=>{
      Leaders.findById(req.params.leaderId)
      .then(leader=>{
          res.statusCode=200;
@@ -45,11 +46,11 @@ leaderRouter.route('/:leaderId')
          res.json(leader);
      })
 })
- .post((req, res, next) => {
+ .post(auth,(req, res, next) => {
     res.statusCode = 403;
     res.end('POST operation not supported on /leaders/'+ req.params.leaderId);
   })
-  .put((req, res, next) => {
+  .put(auth,(req, res, next) => {
        Leaders.findByIdAndUpdate(req.params.leaderId,{
            $set:req.body
        },{new:true})
@@ -60,7 +61,7 @@ leaderRouter.route('/:leaderId')
        })
        .catch(err=>next(err));
   })
-  .delete((req, res, next) => {
+  .delete(auth,(req, res, next) => {
        Leaders.findByIdAndRemove(req.params.leaderId)
        .then(leader=>{
            res.statusCode=200;
