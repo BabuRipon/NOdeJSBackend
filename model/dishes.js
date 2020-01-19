@@ -1,8 +1,12 @@
 const mongoose=require('mongoose');
-const schema=mongoose.Schema;
+const Schema=mongoose.Schema;
 
 
-var commentSchema=new schema({
+var commentSchema=new Schema({
+    author:{
+        type:Schema.Types.ObjectId,
+        ref:"User",  
+    },
     rating:{
         type:Number,
         min:1,
@@ -13,16 +17,13 @@ var commentSchema=new schema({
         type:String,
         required:true
     },
-    author:{
-        type:String,
-        required:true
-    }
+    
 },{
     timestamps:true
 });
 
 
-const dishSchema=new schema({
+const dishSchema=new Schema({
     name:{
         type:String,
         reuired:true,
@@ -33,8 +34,7 @@ const dishSchema=new schema({
         required:true
     },
     image:{
-       type:String,
-       required:true
+       type:String
     },
     category:{
         type:String,
