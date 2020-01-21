@@ -8,6 +8,8 @@ const dishRouter = express.Router();
 
 dishRouter.use(bodyParser.json());
 
+//this is a dish route 
+
 dishRouter.route('/')
 .get((req,res,next) => {
     Dishes.find({})
